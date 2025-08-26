@@ -1,34 +1,32 @@
-from django.http import HttpResponse
 from django.shortcuts import render
-
+from django.urls import reverse_lazy
+from django.views.generic import DetailView, ListView, TemplateView
+from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from catalog.models import Product
-
-
-def home(request):
-    return render(request, template_name="catalog/main.html")
-
 
 def home_contact(request):
     return render(request, template_name="catalog/contacts.html")
 
+class ProductListView(ListView):
+    model = Product
 
-def post_contact(request):
-    if request.method == "POST":
-        name = request.POST.get("name")
-        message = request.POST.get("message")
-        return HttpResponse(
-            f"Спасибо, {name}! Ваше сообщение успешно отправлено и получено"
-        )
-    return render(request, "catalog/contacts.html")
+class ProductCreateView(CreateView):
+    model = Product
+    fields = ("name", "description", "image", "category", "price")
+    success_url = reverse_lazy("catalog:prod_list")
+
+class ProductUpdateView(UpdateView):
+    model = Product
+    fields = ("name", "description", "image", "category", "price")
+    success_url = reverse_lazy("catalog:prod_list")
+
+class ProductDetailView(DetailView):
+    model = Product
+
+class ProductDeleteView(DeleteView):
+    model = Product
+    success_url = reverse_lazy("catalog:prod_list")
 
 
-def product_detail(request, pk):
-    product = Product.objects.get(id=pk)
-    context = {"product": product}
-    return render(request, template_name="catalog/product.html", context=context)
-
-
-def product_all(request):
-    products = Product.objects.all()
-    context = {"products": products}
-    return render(request, "catalog/main.html", context=context)
+class ContactView(TemplateView):
+    template_name = "catalog/contacts.html"
